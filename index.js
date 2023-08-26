@@ -4,7 +4,7 @@ const request = require('request')
 
 const app = express().use(bodyParser.json());
 
-const PAGE_ACCESS_TOKEN = "EAADkyZBtVhZBABO5jyFTxtj4fyRnnXoZAhqCON8GNm8zBiBpGLg6cgkrboYcY3RFnTlbaZCsiJwWnZA3RLtZB94k4oS5o8S1XsfQ5BZCI8bIgNxJqyO1fMxMrhqMgbj6693NZCCuzgHuAVAQ91qR8ZBKN6qkIQxGakSgmOpR1o5BIv81SzrCAAi6sMKATg15ZB2MZAmJj2ZAHWMBEIB5asxm"
+const PAGE_ACCESS_TOKEN = "EAADkyZBtVhZBABOyC09iMWsgl6k9aZBBMod2rZCc9Kgw13mJ13YQJyj73uaYdFoJUG59PzYaipXfux3ufFPTGaVN09M3q56ypIy5pAva1VDolgSZAFaPSi4c9M9T45jd4iMAiK6fIhP4f6RiWCwpuYbZC0WXvTaLZA7AJsoqWo1YluJFhwkZA2Ie2wVavlSthb8t2ccV1L8GNZB4zeP7m"
 
 function sendMessengerResponse(senderPsid, response) {
     // Construir el cuerpo de la solicitud
@@ -12,6 +12,7 @@ function sendMessengerResponse(senderPsid, response) {
         recipient: {
             id: senderPsid
         },
+        messaging_type: "RESPONSE",
         message: response
     };
 

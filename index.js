@@ -1,36 +1,32 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const request = require('request')
+const axios = require('axios').default;
+
 
 const app = express().use(bodyParser.json());
 
 const PAGE_ACCESS_TOKEN = "EAADkyZBtVhZBABOyC09iMWsgl6k9aZBBMod2rZCc9Kgw13mJ13YQJyj73uaYdFoJUG59PzYaipXfux3ufFPTGaVN09M3q56ypIy5pAva1VDolgSZAFaPSi4c9M9T45jd4iMAiK6fIhP4f6RiWCwpuYbZC0WXvTaLZA7AJsoqWo1YluJFhwkZA2Ie2wVavlSthb8t2ccV1L8GNZB4zeP7m"
 
-function sendMessengerResponse(senderPsid, response) {
+function sendMessengerResponse(senderPsid, response, callback) {
     // Construir el cuerpo de la solicitud
     const requestBody = {
         recipient: {
             id: senderPsid
         },
         messaging_type: "RESPONSE",
-        message: response
+        message: response,
     };
 
     // Enviar la solicitud a la API de Messenger
-    request({
-        uri: 'https://graph.facebook.com/v17.0/me/messages',
-        qs: { access_token: PAGE_ACCESS_TOKEN },
-        method: 'POST',
-        json: requestBody
-    }, (err, res, body) => {
-        if (!err && res.statusCode === 200) {
-            console.log('Mensaje enviado a Facebook Messenger');
-        } else {
-            console.error('No se pudo enviar el mensaje a Facebook Messenger');
-            console.error(res);
-            console.error(body);
-        }
-    });
+    axios.post(`https://graph.facebook.com/v11.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, requestBody)
+        .then((res) => {
+            console.log(`Código de estado de la respuesta: ${res.status}`);
+            callback(null, res.data);
+        })
+        .catch((err) => {
+            console.error(`Error al enviar la solicitud: ${util.inspect(err)}`);
+            callback(err);
+        });
 }
 
 app.post('/webhook', (req, res) => {
@@ -49,11 +45,20 @@ app.post('/webhook', (req, res) => {
                 };
 
                 // Enviar la respuesta a Facebook Messenger
-                sendMessengerResponse(webhookEvent.sender.id, response);
+                sendMessengerResponse(webhookEvent.sender.id, response, (err, body) => {
+                    if (err) {
+                        console.error(err);
+                        res.status(422).json(err);
+                        // Aquí puedes manejar el error de acuerdo a tus necesidades
+                    } else {
+                        console.log(body);
+                        res.status(200).json(body);
+                        // Aquí puedes manejar la respuesta de la API de Messenger de acuerdo a tus necesidades
+                    }
+                });
             }
         });
 
-        res.status(200).send('EVENTO RECIBIDO');
     } else {
         res.sendStatus(404);
     }

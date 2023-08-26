@@ -4,7 +4,7 @@ const request = require('request')
 
 const app = express().use(bodyParser.json());
 
-const PAGE_ACCESS_TOKEN = "EAADkyZBtVhZBABOZCYo82EIWz3erbj5nqZCGIDx7AScLPocBKk4s0CndkrTpWGJlGfMVNMQvsvuw6iZCmZAZAoDXl2Eq37PXhukjJ0cfjp8BZAHUPUZBDa4vCO6U4cvDOP5iZCKcOUvDvg7mZAfcdAHt4aYytJ6ta3ocZBxbC6ZBjp2PCZCP0P8Y3jJyvylSEV9vZBtrPETyUOAmjy9qZBwsreMI5EfKQIGL4qyH9hLGdsYNGlHk7b0ZD"
+const PAGE_ACCESS_TOKEN = "EAADkyZBtVhZBABO5jyFTxtj4fyRnnXoZAhqCON8GNm8zBiBpGLg6cgkrboYcY3RFnTlbaZCsiJwWnZA3RLtZB94k4oS5o8S1XsfQ5BZCI8bIgNxJqyO1fMxMrhqMgbj6693NZCCuzgHuAVAQ91qR8ZBKN6qkIQxGakSgmOpR1o5BIv81SzrCAAi6sMKATg15ZB2MZAmJj2ZAHWMBEIB5asxm"
 
 function sendMessengerResponse(senderPsid, response) {
     // Construir el cuerpo de la solicitud

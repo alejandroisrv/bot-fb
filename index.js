@@ -42,14 +42,13 @@ app.post('/webhook', (req, res) => {
             // Verificar si el evento es un mensaje de texto
             if (webhookEvent.message && webhookEvent.message.text) {
                 const messageText = webhookEvent.message.text;
-
                 // Construir la respuesta
                 const response = {
                     text: `Gracias por tu mensaje: "${messageText}"`
                 };
 
                 // Enviar la respuesta a Facebook Messenger
-                sendMessengerResponse(senderPsid, response);
+                sendMessengerResponse(webhookEvent.sender.id, response);
             }
         });
 

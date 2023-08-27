@@ -10,7 +10,7 @@ const getUserIntents = require('./wit');
 
 const app = express().use(bodyParser.json());
 
-const PAGE_ACCESS_TOKEN = "EAADkyZBtVhZBABOZBfCfdDxlZAUSjwvP94ZC930efLJuZB1nNHso3lxrdYycyg500pZCZAYGt1efArZCa9ktT14eMrBThreUtjgg4peFMZBQi70wADQmtF7MyKXKhS13HZCxC1rEo7hq93VhNowmWjU3b2RFAzjMN3ZBK25ZCmL07uQ1AfyZBnRgcs6mPCm20bik0ePijzFshZCG2ezt6KV8IhM"
+const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN || "EAADkyZBtVhZBABOZBfCfdDxlZAUSjwvP94ZC930efLJuZB1nNHso3lxrdYycyg500pZCZAYGt1efArZCa9ktT14eMrBThreUtjgg4peFMZBQi70wADQmtF7MyKXKhS13HZCxC1rEo7hq93VhNowmWjU3b2RFAzjMN3ZBK25ZCmL07uQ1AfyZBnRgcs6mPCm20bik0ePijzFshZCG2ezt6KV8IhM"
 
 
 // Buscar la regla correspondiente a la intención y entidades reconocidas por Wit.ai

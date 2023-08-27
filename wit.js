@@ -1,6 +1,6 @@
 const { Wit } = require('node-wit')
 
-const MY_TOKEN = "7EW62GZLXMBMSHUJBYQCYQGC5RVW5UQ3";
+const MY_TOKEN = process.env.TOKEN_WIT || "7EW62GZLXMBMSHUJBYQCYQGC5RVW5UQ3";
 
 const logger = require('./logger')
 

@@ -50,7 +50,7 @@ const handlePostWebHook = async (req, res) => {
 
     for (const entry of body.entry) {
         const webhookEvent = entry.messaging[0];
-        logger.info('Se ha recibido un evento de webhook:', JSON.stringify(webhookEvent.message));
+        logger.info('Se ha recibido un evento de webhook:' + JSON.stringify(body));
 
         // Verificar si el evento es un mensaje de texto
         if (webhookEvent.message && webhookEvent.message.text) {
@@ -89,7 +89,7 @@ const sendMessengerResponseAsync = async (senderPsid, response) => {
     };
 
     logger.info(`PAGE_ACCESS_TOKEN USADO ${PAGE_ACCESS_TOKEN}`)
-    
+
     try {
         const res = await axios.post(`https://graph.facebook.com/v17.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, requestBody);
         logger.info(`Respuesta de la API de Facebook Messenger: ${res.data}`);

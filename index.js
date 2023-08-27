@@ -1,200 +1,103 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios').default;
-const winston = require('winston');
-const { Wit } = require('node-wit')
-
+const client = require('./wit');
+const getResponseByIntents = require('./response');
+const logger = require('./logger');
+const getProducts = require('./products');
+const getUserIntents = require('./wit');
 
 
 const app = express().use(bodyParser.json());
 
-const PAGE_ACCESS_TOKEN = "EAADkyZBtVhZBABOyC09iMWsgl6k9aZBBMod2rZCc9Kgw13mJ13YQJyj73uaYdFoJUG59PzYaipXfux3ufFPTGaVN09M3q56ypIy5pAva1VDolgSZAFaPSi4c9M9T45jd4iMAiK6fIhP4f6RiWCwpuYbZC0WXvTaLZA7AJsoqWo1YluJFhwkZA2Ie2wVavlSthb8t2ccV1L8GNZB4zeP7m"
+const PAGE_ACCESS_TOKEN = "EAADkyZBtVhZBABOZBfCfdDxlZAUSjwvP94ZC930efLJuZB1nNHso3lxrdYycyg500pZCZAYGt1efArZCa9ktT14eMrBThreUtjgg4peFMZBQi70wADQmtF7MyKXKhS13HZCxC1rEo7hq93VhNowmWjU3b2RFAzjMN3ZBK25ZCmL07uQ1AfyZBnRgcs6mPCm20bik0ePijzFshZCG2ezt6KV8IhM"
 
-const MY_TOKEN = "7EW62GZLXMBMSHUJBYQCYQGC5RVW5UQ3";
-
-const logger = winston.createLogger({
-    level: 'info',
-    format: winston.format.json(),
-    defaultMeta: { service: 'my-app' },
-    transports: [
-        new winston.transports.File({ filename: 'error.log', level: 'error' }),
-        new winston.transports.File({ filename: 'combined.log' })
-    ]
-});
-
-
-const client = new Wit({
-    accessToken: MY_TOKEN,
-    logger: logger, // optional
-});
-
-
-const rules = [
-    {
-        intent: 'Consulta_de_precios',
-        response: [
-            'El precio del producto es $50',
-            'El precio del producto es $100',
-            'El precio del producto es $150'
-        ]
-    },
-    {
-        intent: 'Consulta_disponibilidad',
-        response: [
-            'El producto está disponible',
-            'El producto no está disponible en este momento',
-            'El producto estará disponible en una semana'
-        ]
-    },
-    {
-        intent: 'Consulta_informacion_producto',
-        response: [
-            'El producto es de alta calidad y está hecho con materiales duraderos',
-            'El producto tiene una garantía de un año',
-            'El producto es compatible con la mayoría de los dispositivos'
-        ]
-    },
-    {
-        intent: 'Saludo',
-        response: [
-            '¡Hola! ¿En qué puedo ayudarte hoy?',
-            '¡Bienvenido! ¿En qué puedo ayudarte hoy?',
-            '¡Hola! ¿Cómo estás?'
-        ]
-    },
-    {
-        intent: 'consulta_garantia',
-        response: [
-            'El producto tiene una garantía de un año',
-            'La garantía del producto es de seis meses',
-            'La garantía del producto es de dos años'
-        ]
-    },
-    {
-        intent: 'consulta_informacion_entrega',
-        response: [
-            'El producto será entregado en dos días hábiles',
-            'El producto será entregado en una semana',
-            'El producto será entregado en dos semanas'
-        ]
-    },
-    {
-        intent: 'consulta_informacion_tienda',
-        response: [
-            'Nuestra tienda está ubicada en el centro de la ciudad',
-            'Nuestra tienda está abierta de lunes a sábado de 9am a 6pm',
-            'Nuestra tienda tiene una amplia selección de productos'
-        ]
-    },
-    {
-        intent: 'consulta_listado_productos',
-        response: [
-            'Tenemos una amplia selección de productos, ¿en qué estás interesado?',
-            'Puedes encontrar nuestro listado de productos en nuestro sitio web',
-            '¿Estás buscando un producto en particular?'
-        ]
-    }
-];
 
 // Buscar la regla correspondiente a la intención y entidades reconocidas por Wit.ai
-function findRule(intent, entities) {
-    for (const rule of rules) {
-        if (rule.intent === intent) {
-            if (!rule.entities || rule.entities.every(entity => entities.hasOwnProperty(entity))) {
-                return rule;
+const getResponseForUser = async (intent, entities) => {
+    let responseText = await getResponseByIntents(intent);
+
+    if (intent == 'Consulta_listado_productos') {
+
+    }
+
+    if (intent == 'Consulta_caracteristicas') {
+
+    }
+
+    if (intent == 'Consulta_de_precios') {
+        const products = await getProducts({ modelo: entities["bot_producto:bot_producto"][0]['body'] });
+
+        if (products.length > 0) {
+            let formattedPrice = parseFloat(products[0].precio_venta).toFixed(0).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+            responseText = responseText.replace('Y', formattedPrice)
+
+            console.log(responseText);
+        } else {
+            responseText = null
+        }
+    }
+
+
+    return responseText;
+}
+
+
+const handlePostWebHook = async (req, res) => {
+    logger.info('Se ha recibido una solicitud en /webhook');
+
+    const body = req.body;
+
+    for (const entry of body.entry) {
+        const webhookEvent = entry.messaging[0];
+        logger.info('Se ha recibido un evento de webhook:', webhookEvent);
+
+        // Verificar si el evento es un mensaje de texto
+        if (webhookEvent.message && webhookEvent.message.text) {
+            const messageText = webhookEvent.message.text;
+            const senderPsid = webhookEvent.sender.id;
+
+            logger.info(`Mensaje de texto recibido: ${messageText}`);
+
+            try {
+                const { intent, entities } = await getUserIntents(messageText);
+                const responseTextForUser = await getResponseForUser(intent, entities);
+                if (responseTextForUser == null) {
+                    throw new Error('Sin respuesta para este caso');
+                }
+                const response = { text: responseTextForUser };
+                await sendMessengerResponseAsync(senderPsid, response);
+                logger.info(`Respuesta enviada: ${responseTextForUser}`);
+            } catch (error) {
+                logger.error(`Error al procesar el mensaje: ${error}`);
+                return res.status(422).json(error);
             }
         }
     }
-    return null;
-}
 
-function sendMessengerResponse(senderPsid, response, callback) {
-    // Construir el cuerpo de la solicitud
+    return res.status(200).send('EVENT_RECEIVED');
+};
+
+
+
+const sendMessengerResponseAsync = async (senderPsid, response) => {
     const requestBody = {
-        recipient: {
-            id: senderPsid
-        },
+        recipient: { id: senderPsid },
         messaging_type: "RESPONSE",
         message: response,
     };
 
-    // Enviar la solicitud a la API de Messenger
-    axios.post(`https://graph.facebook.com/v11.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, requestBody)
-        .then((res) => {
-            console.log(`Código de estado de la respuesta: ${res.status}`);
-            callback(null, res.data);
-        })
-        .catch((err) => {
-            console.error(`Error al enviar la solicitud: ${util.inspect(err)}`);
-            callback(err);
-        });
+    try {
+        const res = await axios.post(`https://graph.facebook.com/v17.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, requestBody);
+        logger.info(`Respuesta de la API de Facebook Messenger: ${response.data}`);
+    } catch (error) {
+        logger.error(`Error al enviar la solicitud: ${JSON.stringify(error)}`);
+        throw error;
+    }
 }
 
-app.post('/webhook', (req, res) => {
-    logger.info('Se ha recibido una solicitud en /webhook');
-    const body = req.body;
-    if (body.object === 'page') {
-        body.entry.forEach((entry) => {
-            const webhookEvent = entry.messaging[0];
-            logger.info('Se ha recibido un evento de webhook:', webhookEvent);
 
-            // Verificar si el evento es un mensaje de texto
-            if (webhookEvent.message && webhookEvent.message.text) {
-                const messageText = webhookEvent.message.text;
-                logger.info(`Mensaje de texto recibido: ${messageText}`);
-
-                client.message(messageText).then((response) => {
-                    console.log(`Respuesta generada por Wit.ai: ${JSON.stringify(response)}`);
-                })
-
-                // Obtener el ID del remitente
-                const senderPsid = webhookEvent.sender.id;
-
-                client.message(messageText).then((response) => {
-                    console.log(`Respuesta generada por Wit.ai: ${JSON.stringify(response)}`);
-
-                    // Generar una respuesta basada en la respuesta de Wit.ai
-                    const intent = response.intents[0]?.name;
-                    const entities = response.entities;
-                    const rule = findRule(intent, entities);
-                    if (rule !== null) {
-                        const responseArray = rule.response;
-                        const randomIndex = Math.floor(Math.random() * responseArray.length);
-                        const responseText = responseArray[randomIndex];
-                        const response = { text: responseText };
-                        sendMessengerResponse(senderPsid, response, (err, body) => {
-                            if (err) {
-                                console.error(`Error al enviar la respuesta: ${err}`);
-                                res.status(422).json(err);
-                            } else {
-                                console.log(`Respuesta enviada: ${body}`);
-                                res.status(200).json(body);
-                            }
-                        });
-                    } else {
-                        const responseText = 'Lo siento, no entiendo lo que quieres decir';
-                        const response = { text: responseText };
-                        sendMessengerResponse(senderPsid, response, (err, body) => {
-                            if (err) {
-                                console.error(`Error al enviar la respuesta: ${err}`);
-                                res.status(422).json(err);
-                            } else {
-                                console.log(`Respuesta enviada: ${body}`);
-                                res.status(200).json(body);
-                            }
-                        });
-                    }
-                }).catch((err) => {
-                    console.error(`Error al generar la respuesta con Wit.ai: ${err}`);
-                    res.status(500).json(err);
-                });
-            }
-        });
-        res.status(200).send('EVENT_RECEIVED');
-    } else {
-        res.sendStatus(404);
-    }
-});
+app.post('/webhook', handlePostWebHook);
 
 app.get('/webhook', (req, res) => {
     console.log('GET: webhook');

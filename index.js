@@ -61,7 +61,7 @@ const handlePostWebHook = async (req, res) => {
 
             try {
                 const { intent, entities } = await getUserIntents(messageText);
-                const responseTextForUser = await getResponseForUser(intent, entities);
+                let responseTextForUser = await getResponseForUser(intent, entities);
                 if (responseTextForUser == null) {
                     responseTextForUser = 'Sin respuesta';
                     // throw new Error('Sin respuesta para este caso');

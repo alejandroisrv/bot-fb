@@ -90,7 +90,7 @@ const sendMessengerResponseAsync = async (senderPsid, response) => {
     logger.info(`PAGE_ACCESS_TOKEN USADO ${PAGE_ACCESS_TOKEN}`)
 
     try {
-        const res = await axios.post(`https://graph.facebook.com/v11.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, requestBody);
+        const res = await axios.post(`https://graph.facebook.com/v17.0/102356822506889/messages?access_token=${PAGE_ACCESS_TOKEN}`, requestBody);
         logger.info(`Respuesta de la API de Facebook Messenger: ${res.data}`);
     } catch (error) {
         logger.error(`Error al enviar la solicitud: ${JSON.stringify(error)}`);

@@ -50,30 +50,27 @@ const handlePostWebHook = async (req, res) => {
 
     for (const entry of body.entry) {
         const webhookEvent = entry.messaging[0];
-        logger.info('Se ha recibido un evento de webhook:' + JSON.stringify(body));
 
         // Verificar si el evento es un mensaje de texto
         if (webhookEvent.message && webhookEvent.message.text) {
             const messageText = webhookEvent.message.text;
-            const senderPsid = webhookEvent.sender.id;
+            const senderId = webhookEvent.sender.id;
 
-            logger.info(`Mensaje de texto recibido: ${messageText}`);
+            logger.info(`Mensaje de texto recibido del usuario ${senderId}: ${messageText}`);
 
             try {
-
                 const { intent, entities } = await getUserIntents(messageText);
                 let responseTextForUser = await getResponseForUser(intent, entities);
 
                 if (responseTextForUser == null) {
                     responseTextForUser = 'Sin respuesta';
-                    // throw new Error('Sin respuesta para este caso');
                 }
 
                 const response = { text: responseTextForUser };
-                await sendMessengerResponseAsync(senderPsid, response);
-                logger.info(`Respuesta enviada: ${responseTextForUser}`);
+                await sendMessengerResponseAsync(senderId, response);
+                logger.info(`Respuesta enviada al usuario ${senderId}: ${responseTextForUser}`);
             } catch (error) {
-                logger.error(`Error al procesar el mensaje: ${error}`);
+                logger.error(`Error al procesar el mensaje del usuario ${senderId}: ${error}`);
                 return res.status(422).json(error);
             }
         }

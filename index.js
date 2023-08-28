@@ -60,12 +60,15 @@ const handlePostWebHook = async (req, res) => {
             logger.info(`Mensaje de texto recibido: ${messageText}`);
 
             try {
+
                 const { intent, entities } = await getUserIntents(messageText);
                 let responseTextForUser = await getResponseForUser(intent, entities);
+
                 if (responseTextForUser == null) {
                     responseTextForUser = 'Sin respuesta';
                     // throw new Error('Sin respuesta para este caso');
                 }
+
                 const response = { text: responseTextForUser };
                 await sendMessengerResponseAsync(senderPsid, response);
                 logger.info(`Respuesta enviada: ${responseTextForUser}`);
@@ -75,7 +78,6 @@ const handlePostWebHook = async (req, res) => {
             }
         }
     }
-
     return res.status(200).send('EVENT_RECEIVED');
 };
 
@@ -91,7 +93,7 @@ const sendMessengerResponseAsync = async (senderPsid, response) => {
     logger.info(`PAGE_ACCESS_TOKEN USADO ${PAGE_ACCESS_TOKEN}`)
 
     try {
-        const res = await axios.post(`https://graph.facebook.com/v17.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, requestBody);
+        const res = await axios.post(`https://graph.facebook.com/v11.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, requestBody);
         logger.info(`Respuesta de la API de Facebook Messenger: ${res.data}`);
     } catch (error) {
         logger.error(`Error al enviar la solicitud: ${JSON.stringify(error)}`);

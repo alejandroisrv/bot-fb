@@ -5,29 +5,46 @@ const myFormat = printf(({ level, message, timestamp }) => {
     return `${timestamp} [${level.toUpperCase()}]: ${message}`;
 });
 
-const logger = createLogger({
+const errorTransport = new transports.File({
+    filename: 'logs/error.log',
+    level: 'error',
     format: combine(
         timestamp(),
         myFormat
     ),
+    maxsize: 5242880, // 5MB
+    maxFiles: 5
+});
+
+const appTransport = new transports.File({
+    filename: 'logs/app.log',
+    format: combine(
+        timestamp(),
+        myFormat
+    ),
+    maxsize: 5242880, // 5MB
+    maxFiles: 5
+});
+
+if (process.env.NODE_ENV !== 'production') {
+    appTransport.add(new transports.Console({
+        format: combine(
+            timestamp(),
+            myFormat
+        )
+    }));
+    errorTransport.add(new transports.Console({
+        format: combine(
+            timestamp(),
+            myFormat
+        )
+    }));
+}
+
+const logger = createLogger({
     transports: [
-        new transports.Console({
-            format: combine(
-                timestamp(),
-                myFormat
-            ),
-            level: 'error'
-        }),
-        new transports.File({
-            filename: 'logs/error.log',
-            level: 'error',
-            format: combine(
-                timestamp(),
-                myFormat
-            ),
-            maxsize: 5242880, // 5MB
-            maxFiles: 5
-        })
+        errorTransport,
+        appTransport
     ]
 });
 

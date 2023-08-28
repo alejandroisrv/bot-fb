@@ -26,20 +26,6 @@ const appTransport = new transports.File({
     maxFiles: 5
 });
 
-if (process.env.NODE_ENV !== 'production') {
-    appTransport.add(new transports.Console({
-        format: combine(
-            timestamp(),
-            myFormat
-        )
-    }));
-    errorTransport.add(new transports.Console({
-        format: combine(
-            timestamp(),
-            myFormat
-        )
-    }));
-}
 
 const logger = createLogger({
     transports: [

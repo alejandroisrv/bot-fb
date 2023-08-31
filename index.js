@@ -13,8 +13,9 @@ const app = express().use(bodyParser.json());
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN || "EAADkyZBtVhZBABO2bUPVWxHCZBAXpVz176vP3RdBqIVvFPjtBvOEIyZBi8ZBqkPf7ykJU4SyZCTOZCAiYwJZCvGpjsVTEUObTnCdsT0EDMeG5l6XP7cU7ZBYTVeRHoGOEw2FCbFG2y7JAlhAqsx6IESVjT71vO83zYqcJSSgfrcW2eWHjtJMWqCZAErM85MIqrUu6qjccmZAsVmYD3lwKKS"
 
 const handlePostWebHook = async (req, res) => {
-    logger.info('Se ha recibido una solicitud en /webhook');
     const page = req.params.page
+    
+    logger.info('Se ha recibido una solicitud en /webhook/'+ page);
 
     const body = req.body;
 

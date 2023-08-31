@@ -2,7 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const axios = require('axios').default;
 const client = require('./wit');
-const getResponseByIntents = require('./response');
+const getResponseForUser = require('./response');
 const logger = require('./logger');
 const getProducts = require('./products');
 const getUserIntents = require('./wit');
@@ -10,38 +10,7 @@ const getUserIntents = require('./wit');
 
 const app = express().use(bodyParser.json());
 
-const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN || "EAADkyZBtVhZBABOZBfCfdDxlZAUSjwvP94ZC930efLJuZB1nNHso3lxrdYycyg500pZCZAYGt1efArZCa9ktT14eMrBThreUtjgg4peFMZBQi70wADQmtF7MyKXKhS13HZCxC1rEo7hq93VhNowmWjU3b2RFAzjMN3ZBK25ZCmL07uQ1AfyZBnRgcs6mPCm20bik0ePijzFshZCG2ezt6KV8IhM"
-
-
-// Buscar la regla correspondiente a la intención y entidades reconocidas por Wit.ai
-const getResponseForUser = async (intent, entities) => {
-    let responseText = await getResponseByIntents(intent);
-
-    if (intent == 'Consulta_listado_productos') {
-
-    }
-
-    if (intent == 'Consulta_caracteristicas') {
-
-    }
-
-    if (intent == 'Consulta_de_precios') {
-        const products = await getProducts({ modelo: entities["bot_producto:bot_producto"][0]['body'] });
-
-        if (products.length > 0) {
-            let formattedPrice = parseFloat(products[0].precio_venta).toFixed(0).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
-            responseText = responseText.replace('Y', formattedPrice)
-
-            console.log(responseText);
-        } else {
-            responseText = null
-        }
-    }
-
-
-    return responseText;
-}
-
+const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN || "EAADkyZBtVhZBABO2bUPVWxHCZBAXpVz176vP3RdBqIVvFPjtBvOEIyZBi8ZBqkPf7ykJU4SyZCTOZCAiYwJZCvGpjsVTEUObTnCdsT0EDMeG5l6XP7cU7ZBYTVeRHoGOEw2FCbFG2y7JAlhAqsx6IESVjT71vO83zYqcJSSgfrcW2eWHjtJMWqCZAErM85MIqrUu6qjccmZAsVmYD3lwKKS"
 
 const handlePostWebHook = async (req, res) => {
     logger.info('Se ha recibido una solicitud en /webhook');
@@ -57,9 +26,11 @@ const handlePostWebHook = async (req, res) => {
             const senderId = webhookEvent.sender.id;
 
             logger.info(`Mensaje de texto recibido del usuario ${senderId}: ${messageText}`);
+            
 
             try {
                 const { intent, entities } = await getUserIntents(messageText);
+                logger.info(`Intencion del usuario ${intent}`);
                 let responseTextForUser = await getResponseForUser(intent, entities);
 
                 if (responseTextForUser == null) {

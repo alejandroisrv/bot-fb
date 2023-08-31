@@ -14,6 +14,7 @@ const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN || "EAADkyZBtVhZBABO2bUP
 
 const handlePostWebHook = async (req, res) => {
     logger.info('Se ha recibido una solicitud en /webhook');
+    const page = req.params.page
 
     const body = req.body;
 
@@ -38,7 +39,7 @@ const handlePostWebHook = async (req, res) => {
                 }
 
                 const response = { text: responseTextForUser };
-                await sendMessengerResponseAsync(senderId, response);
+                await sendMessengerResponseAsync(senderId, response, page);
                 logger.info(`Respuesta enviada al usuario ${senderId}: ${responseTextForUser}`);
             } catch (error) {
                 logger.error(`Error al procesar el mensaje del usuario ${senderId}: ${error}`);
@@ -51,17 +52,22 @@ const handlePostWebHook = async (req, res) => {
 
 
 
-const sendMessengerResponseAsync = async (senderPsid, response) => {
+const sendMessengerResponseAsync = async (senderPsid, response, page) => {
     const requestBody = {
         recipient: { id: senderPsid },
         messaging_type: "RESPONSE",
         message: response,
     };
 
+    const ids = {
+        tecnowins: "102356822506889",
+        alejandro: ""
+    }
+
     logger.info(`PAGE_ACCESS_TOKEN USADO ${PAGE_ACCESS_TOKEN}`)
 
     try {
-        const res = await axios.post(`https://graph.facebook.com/v17.0/102356822506889/messages?access_token=${PAGE_ACCESS_TOKEN}`, requestBody);
+        const res = await axios.post(`https://graph.facebook.com/v17.0/${ids[page]}/messages?access_token=${PAGE_ACCESS_TOKEN}`, requestBody);
         logger.info(`Respuesta de la API de Facebook Messenger: ${res.data}`);
     } catch (error) {
         logger.error(`Error al enviar la solicitud: ${JSON.stringify(error)}`);
@@ -70,9 +76,9 @@ const sendMessengerResponseAsync = async (senderPsid, response) => {
 }
 
 
-app.post('/webhook', handlePostWebHook);
+app.post('/webhook/:page', handlePostWebHook);
 
-app.get('/webhook', (req, res) => {
+app.get('/webhook/:page', (req, res) => {
     console.log('GET: webhook');
 
     const VERIFY_TOKEN = 'stringUnicoParaTuAplicacion';

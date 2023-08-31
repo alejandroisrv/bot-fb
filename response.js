@@ -88,7 +88,6 @@ const getResponseForUser = async (intent, entities) => {
             break;
 
         default:
-            responseText = "Sin respuesta";
             break;
     }
 
